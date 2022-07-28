@@ -23,6 +23,7 @@ namespace MobileStoreFeatureFlags.Controllers
 
         public async Task<IActionResult> Index()
         {
+            //THIS FEATURE FLAG IS ADDED IN FEATURE MANAGER in AZURE APP CONFIG as MobileDetailedReview
             if (await _featureManager.IsEnabledAsync(nameof(FeatureFlags.MobileDetailedReview)))
             {
                 ViewBag.IsEnabled = "Viewing Mobile Details is enabled";

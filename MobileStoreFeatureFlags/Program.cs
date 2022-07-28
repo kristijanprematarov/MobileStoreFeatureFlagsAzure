@@ -1,4 +1,6 @@
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.FeatureManagement;
 using MobileStoreFeatureFlags.Data;
 using MobileStoreFeatureFlags.Handlers;
@@ -17,6 +19,45 @@ builder.Services.AddFeatureManagement()
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IMobileDataService, MobileDataServiceMock>();
+
+builder.Configuration.AddAzureAppConfiguration(options =>
+{
+    string? endpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIG_ENDPOINT");
+
+    if (endpoint is null)
+    {
+        throw new ArgumentNullException("APP CONFIG ENDPOINT was not added");
+    }
+
+    var credentials = new DefaultAzureCredential();
+
+    options.Connect(new Uri(endpoint), credentials);
+
+    //we need this to access key vault from Azure App Config
+    options.ConfigureKeyVault(x =>
+    {
+        x.SetCredential(credentials);
+    });
+
+    options.ConfigureRefresh(refreshOptions =>
+    {
+        refreshOptions.Register("Settings:Sentinel", refreshAll: true)
+            .SetCacheExpiration(new TimeSpan(0, 0, 0));
+    });
+
+    options.UseFeatureFlags();
+});
+
+//public static void ConfigureKeyVault(this IConfigurationBuilder config)
+//{
+//    string? keyVaultEndpoint = Environment.GetEnvironmentVariable("KEYVAULT_ENDPOINT");
+
+//    if (keyVaultEndpoint is null)
+//        throw new InvalidOperationException("Store the Key Vault endpoint in a KEYVAULT_ENDPOINT environment variable.");
+
+//    var secretClient = new SecretClient(new Uri(keyVaultEndpoint), new DefaultAzureCredential());
+//    config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+//}
 
 var app = builder.Build();
 
