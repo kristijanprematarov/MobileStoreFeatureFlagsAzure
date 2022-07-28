@@ -1,0 +1,29 @@
+﻿@using MobileStoreFeatureFlags.Features
+@model List<Mobile>
+@{
+    ViewData["Title"] = "View All Mobiles Review";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h6 class="text-danger" style="font-weight: bold">@ViewBag.IsEnabled</h6>
+
+<table class="table table-responsive table-hover">
+    <tr>
+        <td>Id</td>
+        <td>Name</td>
+        <td>Specification</td>
+        <td>Rating</td>
+        <td>Review Details</td>
+    </tr>
+    @foreach (Mobile mobile in Model)
+    {
+        <tr>
+            <td>@mobile.Id</td>
+            <td>@mobile.Name</td>
+            <td>@mobile.Specification</td>
+            <td>@mobile.MobileReview.Rating</td>
+            <td>@Html.ActionLink("Click Here", "ReviewDetails", new { mobileId = mobile.Id })</td>
+        </tr>
+    }
+</table>
